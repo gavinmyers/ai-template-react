@@ -1,19 +1,25 @@
-# Application Lifecycle
+# Main Roadmap
 
-## Stage 1: Application
-Reference: [companion/architecture/application.md](architecture/application.md)
+This directory contains the step-by-step guide for building the application.
 
-## Stage 2: Quality Assurance
-Reference: [companion/architecture/quality_assurance.md](architecture/quality_assurance.md)
+## PowerShell Requirements
 
-## Stage 3: UI Design System
-Reference: [companion/architecture/ui_design.md](architecture/ui_design.md)
+When executing shell commands in a PowerShell environment:
+- **Avoid standard `curl`**: It is an alias for `Invoke-WebRequest` and may cause interactive prompts.
+- **Use `curl.exe`**: For standard `curl` behavior.
+- **Use `Invoke-RestMethod`**: For native PowerShell API interactions.
+- **Use `-UseBasicParsing`**: When using `Invoke-WebRequest` to avoid Internet Explorer dependencies.
 
-## Stage 4: Database Implementation (SQLite)
-Reference: [companion/architecture/database.md](architecture/database.md)
+## General Guidelines
 
-## Stage 5: Full Stack Integration
-Reference: [companion/architecture/full_stack_integration.md](architecture/full_stack_integration.md)
+### Progress Logging
+Each task will explicitly define its own recording requirements. When a task is completed, follow the specific logging instructions provided within that task's README.
 
-## Stage 6: Session Management
-Reference: [companion/architecture/session_management.md](architecture/session_management.md)
+### Workflow Continuity
+To maintain absolute context and avoid configuration drift:
+- **State Review**: Before starting any new task (STEP_X/TASK_Y), you must read all existing logs in the `.companion/` directory and the current `APPLICATION.md`.
+- **Consistency Check**: Verify that the current state of the codebase matches the documented progress before proceeding with new modifications.
+
+## Steps
+
+- **[STEP_0: Environment Setup](./STEP_0/TASK_0/README.md)**: Initialize the project environment and verify capabilities.
