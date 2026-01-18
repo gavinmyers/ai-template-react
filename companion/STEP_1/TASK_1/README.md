@@ -1,32 +1,47 @@
-# STEP_1/TASK_1: pnpm Workspace Validity
+STEP_1 / TASK_1 — Template workspace correctness (project/ is the template output)
+Goal
 
-## Goal
-Prove this repo is a real pnpm workspace and that pnpm can see packages.
+Prove this repo is a template, and the actual app workspace lives in ./project and is self-contained.
 
-## Run Commands
-```powershell
-# 1) Workspace file exists and is parseable
+Run (copy/paste)
+
+From template repo root:
+
+# 1) Template repo root should NOT be a pnpm workspace root
+Test-Path .\package.json
 Test-Path .\pnpm-workspace.yaml
-Get-Content .\pnpm-workspace.yaml
 
-# 2) pnpm sees the workspace root and lists packages
-pnpm -w -v
-pnpm -w list -r --depth -1
+# 2) project/ must exist and contain the workspace root
+Test-Path .\project
+Test-Path .\project\package.json
+Test-Path .\project\pnpm-workspace.yaml
+Test-Path .\project\apps
+Test-Path .\project\packages
 
-# 3) Verify the expected top-level layout exists
-Test-Path .\apps
-Test-Path .\packages
-ls .\apps
-ls .\packages
-```
+# 3) pnpm must resolve packages when run inside project/
+Push-Location .\project
+pnpm -v
+pnpm list -r --depth -1
+Pop-Location
 
-## Verification Criteria
-- `pnpm -w list -r --depth -1` prints at least:
-    - the root workspace package, and
-    - one or more packages under `apps/` and/or `packages/`
-- `apps/` and `packages/` exist and list contents.
+Verify (strict)
 
-## Record
-Add to `.companion/APPLICATION.md`:
-- Workspace root name
-- Package count (rough is fine, e.g. "apps=1, packages=1")
+At template repo root:
+
+package.json is False
+
+pnpm-workspace.yaml is False
+
+Inside project/:
+
+package.json + pnpm-workspace.yaml are True
+
+apps/ and packages/ are True
+
+pnpm list -r --depth -1 lists workspace packages (not “No package found…”)
+
+Record
+
+Add to .companion/APPLICATION.md:
+
+Template validated: repo root is not a workspace; ./project is the workspace root and resolves packages via pnpm.
