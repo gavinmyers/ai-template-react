@@ -1,55 +1,25 @@
-STEP_4 / TASK_0 — Add Postgres + Prisma package (Prisma 7)
+# STEP_4: Database & Persistence (The Data Blueprint)
 
-Goal
-Initialize the database package and install Prisma 7 dependencies, including the required Postgres adapter.
+## Goal
+Establish the mandated database schema. Every application MUST start with these models to support the Standard API Baseline.
 
-### 1. Install Prisma 7 + Postgres Adapter
-```powershell
-Push-Location project
-pnpm add -D -w prisma dotenv
-pnpm add -w @prisma/client @prisma/adapter-pg pg
-pnpm add -D -w @types/pg
-Pop-Location
-```
+## Required Models (Prisma)
 
-### 2. Create Database Package
-Create `project/packages/database/package.json`:
-```json
-{
-  "name": "@repo/database",
-  "private": true,
-  "type": "module",
-  "exports": {
-    ".": "./src/index.ts"
-  },
-  "dependencies": {
-    "@prisma/client": "^7.2.0",
-    "@prisma/adapter-pg": "^7.2.0",
-    "pg": "^8.13.3"
-  },
-  "scripts": {
-    "generate": "prisma generate",
-    "migrate": "prisma migrate dev",
-    "studio": "prisma studio"
-  }
-}
-```
+### 1. `ApplicationInfo`
+Used by `GET /api/info` to identify the instance.
+- `id`: Int (Autoincrement, ID)
+- `name`: String
+- `description`: String?
+- `updatedAt`: DateTime (Updated automatically)
 
-Create `project/packages/database/src/index.ts`:
-```typescript
-import { PrismaClient } from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
-import pg from "pg";
+### 2. `SessionCounter`
+Used by `GET /api/session` to track basic analytics.
+- `id`: Int (Autoincrement, ID)
+- `sessionId`: String (Unique Index)
+- `visits`: Int (Default: 0)
+- `updatedAt`: DateTime
 
-const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
-
-export const prisma =
-  globalForPrisma.prisma ??
-  (() => {
-    const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
-    const adapter = new PrismaPg(pool);
-    return new PrismaClient({ adapter, log: ["error", "warn"] });
-  })();
-
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
-```
+## Standard Workflow
+1.  **Sync**: The API must ensure at least one `ApplicationInfo` record exists on startup.
+2.  **Migrations**: Use `prisma migrate deploy` for all non-local environments.
+3.  **Reset**: The `pnpm run test` script MUST perform a full schema drop and migrate for every run.

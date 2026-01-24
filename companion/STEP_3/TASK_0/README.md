@@ -1,65 +1,29 @@
-STEP_3 / TASK_0 — Vertical slice baseline (API health/info + session + UI status)
+# STEP_3: Backend Foundation (The API Blueprint)
 
-Goal
-Create a Fastify API in `apps/api` and update the `web` application to display health, info, and session status, proving UI-to-API connectivity with reliable cookie-based sessions.
+## Goal
+Establish the mandated API surface area. Every application MUST implement these core endpoints to satisfy health checks, session management, and observability.
 
-1. Create the API app
-- Initialize `apps/api` with Fastify, CORS, and Cookie plugins.
-- Define `/health`, `/info`, and `/session` endpoints.
+## Standard Endpoints
 
-### Server Configuration
-Important: Use `trustProxy: true` when running behind Nginx.
+### 1. System Health & Metadata
+- **`GET /api/health`**:
+    - **Requirement**: Returns `200 OK`.
+    - **Response Body**: `{ "status": "ok", "timestamp": "ISO8601_STRING", "version": "VERSION_STRING" }`
+- **`GET /api/info`**:
+    - **Requirement**: Fetches metadata from the `ApplicationInfo` table.
+    - **Response Body**: `{ "name": "APP_NAME", "description": "APP_DESC" }`
 
-```typescript
-const app = Fastify({ logger: true, trustProxy: true });
-```
+### 2. Session Management
+- **`GET /api/session`**:
+    - **Requirement**: Initialize a `sid` cookie if missing. Upsert a record in the `SessionCounter` table.
+    - **Response Body**: `{ "hasSession": true, "sessionId": "UUID", "visits": number }`
+- **`POST /api/session/reset`**:
+    - **Requirement**: Delete session record and clear cookie.
+    - **Response**: `204 No Content`.
 
-### Session Implementation (Direct Cookie)
-To ensure reliability across Docker and local development, we use direct cookie management via `@fastify/cookie`.
-
-```typescript
-import crypto from "node:crypto";
-import cookie from "@fastify/cookie";
-
-await app.register(cookie, {
-  secret: "dev-secret-at-least-32-chars-long",
-});
-
-app.get("/session", async (req, reply) => {
-  let sid = req.cookies.sid;
-
-  if (!sid) {
-    sid = crypto.randomUUID();
-    reply.setCookie("sid", sid, {
-      path: "/",
-      httpOnly: true,
-      sameSite: "lax",
-      secure: false,
-    });
-  }
-
-  // Baseline uses in-memory/static tracking (DB added in STEP_4)
-  return { hasSession: true, sessionId: sid, visits: 1 };
-});
-```
-
-2. Update the UI
-- Add a tiny API client in `web/src/api.ts`.
-- Update `App.tsx` to fetch and display the baseline status from the API.
-
-Verification (Manual)
-1. Start the API in one terminal:
-   ```powershell
-   Push-Location .\project
-   pnpm --filter api dev
-   ```
-2. Start the UI in another terminal:
-   ```powershell
-   Push-Location .\project
-   pnpm --filter web dev
-   ```
-3. Open the UI and verify that `/session` returns a stable `sessionId`.
-
-Record
-Add to .companion/APPLICATION.md:
-Vertical slice baseline established: Fastify API provides health/info/session endpoints; React UI consumes them with full cookie support.
+## Core Implementation Requirements
+- **Framework**: Fastify.
+- **Middleware**: `@fastify/cors` (enabled for all origins in dev) and `@fastify/cookie` (required for sessions).
+- **Validation**: Every environment variable used must be checked via a `requireEnv()` helper that calls `process.exit(1)` on failure.
+- **Logging**: Use `pino` (Fastify default) with custom request logging middleware to output `[ACCESS]` lines to the console.
+- **Shutdown**: Listen for `SIGINT` and `SIGTERM` to close Prisma and the Fastify server cleanly.

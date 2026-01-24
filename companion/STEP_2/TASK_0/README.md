@@ -1,88 +1,27 @@
-STEP_2 / TASK_0 — Scaffold the project workspace
+# STEP_2: Frontend Foundation (The UI Blueprint)
 
-Outcome: project/ becomes a runnable monorepo that installs and starts.
+## Goal
+Establish the mandated UI architecture. Every application MUST start with this layout and state management strategy.
 
-Purpose (tight)
+## Required Components
 
-Create a real Node/TypeScript monorepo inside project/ that:
+### 1. The Layout Shell (`Layout.tsx`)
+- **Requirement**: A persistent 2-column layout.
+- **Sidebar**: Fixed width (e.g., `w-64`), contains the Logo and Navigation links.
+- **Main**: Auto-scrolling area using `<Outlet />` for child routes.
 
-installs cleanly
+### 2. Standard Views
+- **Dashboard (`Dashboard.tsx`)**:
+    - **Endpoint**: Fetches from `/api/health`.
+    - **Display**: Shows "System Status" cards (Uptime, Timestamp, Version).
+- **Settings (`Settings.tsx`)**:
+    - **Endpoint**: Fetches from `/api/info`.
+    - **Display**: Allows editing application metadata.
 
-has at least one runnable app
-
-defines the commands we will rely on later (dev, build)
-
-No DB. No UI yet. Just “it runs”.
-
-Assumptions
-
-You are in the template repo root
-
-project/ exists but is either empty or partially scaffolded
-
-Run (copy/paste, from repo root)
-# enter project workspace
-Push-Location .\project
-
-# initialize package.json if missing
-if (-not (Test-Path package.json)) {
-  pnpm init
-}
-
-# ensure workspace layout exists
-New-Item -ItemType Directory -Force apps | Out-Null
-New-Item -ItemType Directory -Force packages | Out-Null
-
-# create a minimal web app (Vite + React + TS)
-Push-Location apps
-pnpm create vite web -- --template react-ts
-Pop-Location
-
-# install workspace deps
-pnpm install
-
-Pop-Location
-
-Minimal wiring (required)
-
-Edit project/pnpm-workspace.yaml to:
-
-packages:
-  - apps/*
-  - packages/*
-
-
-Edit project/package.json to include root scripts:
-
-{
-  "private": true,
-  "scripts": {
-    "dev": "pnpm -r dev",
-    "build": "pnpm -r build"
-  }
-}
-
-
-(No tooling yet. Just orchestration.)
-
-Run (verification - Manual)
-# In a separate terminal or when prompted:
-Push-Location .\project
-pnpm dev
-Pop-Location
-
-Verify (strict)
-
-pnpm install completes without error
-
-Manual Check: pnpm dev starts the Vite dev server and prints a localhost URL.
-
-This is the first non-negotiable milestone:
-
-A user can clone the template, go into project/, run pnpm install, and see a running app.
-
-Record
-
-Add to .companion/APPLICATION.md:
-
-STEP_2/TASK_0 complete: project workspace scaffolded as a runnable pnpm monorepo with a React + TypeScript app.
+## Required Stack & Patterns
+- **Framework**: Vite + React + TypeScript.
+- **Navigation**: `react-router-dom` (BrowserRouter).
+- **Data Fetching**: `@tanstack/react-query` (QueryClientProvider).
+- **API Client**: `axios` with base URL configuration.
+- **Styling**: **Tailwind CSS** for layout/utility and **Material UI (MUI)** for complex components (Tables, Modals).
+- **Icons**: `lucide-react`.

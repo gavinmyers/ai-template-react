@@ -1,40 +1,37 @@
-# STEP_1/TASK_0: Git Repository Validity & Currency Check
+# STEP_1: Repository & Monorepo Structure
 
 ## Goal
-Confirm this directory is a valid git repository, on a known branch, and correctly configured.
+Establish the foundational directory structure and configuration for a Turborepo-managed monorepo.
 
-## Objectives
-- Confirm valid git repository status.
-- Identify current branch and commit.
-- Evaluate working tree state.
-- Check upstream synchronization.
-- Verify .companion/ is correctly ignored.
+## Tasks
 
-## Run Commands
-`powershell
-# 1) Must be inside a git repo
-git rev-parse --is-inside-work-tree
+### TASK_0: Git Initialization
+- Initialize a new git repository in the root directory.
+- Create a `.gitignore` that excludes `node_modules`, `dist`, `build`, logs, and environment secrets.
 
-# 2) Show current branch and commit
-git branch --show-current
-git rev-parse --short HEAD
+### TASK_1: Turborepo Scaffolding
+- Initialize a `pnpm` workspace (`pnpm-workspace.yaml`).
+- create `turbo.json` to define build pipelines (e.g., `build`, `test`, `lint`, `dev`).
+- Create the following directory structure:
+    ```text
+    /
+    ├── apps/
+    │   ├── api/       # Backend service
+    │   └── web/       # Frontend service
+    ├── packages/
+    │   └── database/  # Shared Prisma client & schema
+    ├── e2e/           # Shared E2E tests (Playwright)
+    ├── .gitignore
+    ├── package.json   # Root scripts
+    ├── pnpm-workspace.yaml
+    └── turbo.json
+    ```
 
-# 3) Show working tree state
-git status --porcelain
-
-# 4) Check for upstream
-git remote -v
-git status -sb
-
-# 5) Verify .companion is ignored
-Select-String -Path .gitignore -Pattern '^\s*\.companion/\s*$' -List
-git check-ignore -v .companion/USER.md
-git check-ignore -v .companion/APPLICATION.md
-`
-
-## Verification Criteria
-- git rev-parse --is-inside-work-tree returns 	rue.
-- A branch name is printed (not detached HEAD).
-- git status --porcelain is empty or shows expected changes.
-- git status -sb shows no "behind" count.
-- .companion/ is confirmed ignored.
+### TASK_2: Root Configuration
+- Define root-level scripts in `package.json` to orchestrate common tasks:
+    - `dev`: Run all apps in development mode.
+    - `build`: Build all apps and packages.
+    - `test`: Run all tests (unit + e2e).
+    - `lint`: Lint all code.
+    - `db:migrate`: Run database migrations.
+- Install global dev dependencies (e.g., `typescript`, `eslint`, `prettier`).
